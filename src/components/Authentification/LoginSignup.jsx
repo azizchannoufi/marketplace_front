@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './LoginSignup.css';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { app } from '../../firebase-config'; // Firebase app initialization
+// import { app } from '../../firebase-config'; // Firebase app initialization
 import axios from 'axios';
 
 function LoginSignup({ onLogin }) {
@@ -21,27 +21,27 @@ function LoginSignup({ onLogin }) {
   };
 
   // Login handler
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const auth = getAuth(app);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      const token = await user.getIdToken();
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const auth = getAuth(app);
+  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
+  //     const token = await user.getIdToken();
   
-      // Enregistrer le uid et le token dans le localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('uid', user.uid);
+  //     // Enregistrer le uid et le token dans le localStorage
+  //     localStorage.setItem('token', token);
+  //     localStorage.setItem('uid', user.uid);
   
-      // Appeler la fonction de parent pour mettre à jour l'état
-      onLogin({ uid: user.uid });
+  //     // Appeler la fonction de parent pour mettre à jour l'état
+  //     onLogin({ uid: user.uid });
   
-      alert('Login successful!');
-    } catch (error) {
-      console.error('Login error:', error.message);
-      alert('Invalid email or password');
-    }
-  };
+  //     alert('Login successful!');
+  //   } catch (error) {
+  //     console.error('Login error:', error.message);
+  //     alert('Invalid email or password');
+  //   }
+  // };
   // Signup handler
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -73,7 +73,9 @@ function LoginSignup({ onLogin }) {
           {isLogin ? (
             <div className="login-form">
               <h2 className="text-center mb-4">Login</h2>
-              <form onSubmit={handleLogin}>
+              <form 
+              // onSubmit={handleLogin}
+              >
                 <div className="form-group">
                   <input
                     type="email"
