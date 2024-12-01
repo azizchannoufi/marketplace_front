@@ -1,0 +1,14 @@
+.our-story-container {
+    font-family: Arial, sans-serif;
+  }
+  
+  .our-story-container h1, 
+  .our-story-container h2 {
+    color: #333;
+  }
+  
+  .our-story-container p {
+    color: #555;
+    line-height: 1.6;
+  }
+  

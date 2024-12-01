@@ -1,0 +1,32 @@
+.login-signup-container {
+  background-color: #f8f9fa;
+}
+
+.form-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.login-form,
+.signup-form {
+  width: 100%;
+  padding: 20px;
+  transition: transform 0.5s ease;
+}
+
+.show-login .signup-form {
+  transform: translateX(100%);
+}
+
+.show-signup .login-form {
+  transform: translateX(-100%);
+}
+
+.show-signup .signup-form {
+  transform: translateX(0);
+}
+
+.toggle-link:hover {
+  text-decoration: underline;
+}
