@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Form, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
-
+import axios from 'axios'
 const Remise = () => {
+
+  const [load,setLoad]=useState(false)
+
   const [remises, setRemises] = useState([
     {
       id: 1,
-      name: 'Remise Étudiant',
-      percentage: 10,
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
+      titre: 'Remise Étudiant',
+      pourcentageRemise: 10,
+      date_debut: '2024-01-01',
+      date_fin: '2024-12-31',
       status: true,
     },
   ]);
@@ -16,12 +19,93 @@ const Remise = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingRemise, setEditingRemise] = useState(null);
   const [newRemise, setNewRemise] = useState({
-    name: '',
-    percentage: '',
-    startDate: '',
-    endDate: '',
-    status: true,
+    titre: '',
+    pourcentageRemise: '',
+    date_debut: '',
+    date_fin: '',
+    status: 'inactive',
   });
+
+///////////////////////////////////////API///////////////////////////////////////////////////////////////
+// Fonction pour récupérer toutes les remises
+const fetchRemise = async () => {
+  try {
+    const response = await axios.get('http://localhost:3002/api/remise/');
+    if (response.status === 200) {
+      console.log('Remises récupérées avec succès:', response.data);
+      setRemises (response.data);
+    } else {
+      console.error('Erreur lors de la récupération des remises.');
+    }
+  } catch (error) {
+    console.error('Erreur réseau:', error);
+  }
+};
+
+// Fonction pour créer une nouvelle remise
+const createRemise = async (info) => {
+  try {
+    const response = await axios.post('http://localhost:3002/api/remise/', info);
+    if (response.status === 201) {
+      console.log('Remise créée avec succès:', response.data);
+      setLoad(!load)
+    } else {
+      console.error('Erreur lors de la création de la remise.');
+    }
+  } catch (error) {
+    console.error('Erreur réseau:', error);
+  }
+};
+// Fonction pour  afficher activer/désactiver une remise
+// const fetchstatus =async(id)=>{
+//   try{
+//     const response = await axios.get("http://localhost:3002/api/articles/remiseart/"+id)
+//     if(response.status===200){
+//       console.log("remise status:",response.data)
+//       return response.data.status
+//     }else {
+//       console.error('Erreur lors de la création de la remise.');
+//     }
+//   }catch(e){
+//     console.error('Erreur réseau:', error);
+//   }
+// }
+
+
+
+// Fonction pour activer/désactiver une remise
+const activateRemise = async (idRemise, info) => {
+  try {
+    console.log(info);
+    
+    const response = await axios.put(
+      `http://localhost:3002/api/articles/remise/${idRemise}`,
+      {
+        statusR:info
+      }
+    );
+    if (response.status === 200) {
+      console.log('Remise mise à jour avec succès:', response.data);
+      setLoad(!load)
+    } else {
+      console.error('Erreur lors de la mise à jour de la remise.');
+    }
+  } catch (error) {
+    console.error('Erreur réseau:', error);
+  }
+};
+
+
+useEffect(()=>{
+  fetchRemise()
+},[load])
+///////////////////////////////////////API///////////////////////////////////////////////////////////////
+
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  const date = new Date(dateString);
+  return date.toLocaleDateString('fr-FR', options);
+}
 
   const handleShowModal = (remise = null) => {
     if (remise) {
@@ -29,7 +113,7 @@ const Remise = () => {
       setNewRemise(remise);
     } else {
       setEditingRemise(null);
-      setNewRemise({ name: '', percentage: '', startDate: '', endDate: '', status: true });
+      setNewRemise({ titre: '', pourcentageRemise: '', date_debut: '', date_fin: '' });
     }
     setShowModal(true);
   };
@@ -47,13 +131,7 @@ const Remise = () => {
         )
       );
     } else {
-      setRemises([
-        ...remises,
-        {
-          ...newRemise,
-          id: remises.length + 1,
-        },
-      ]);
+      createRemise(newRemise)
     }
     handleCloseModal();
   };
@@ -62,12 +140,8 @@ const Remise = () => {
     setRemises(remises.filter((remise) => remise.id !== id));
   };
 
-  const toggleStatus = (id) => {
-    setRemises(
-      remises.map((remise) =>
-        remise.id === id ? { ...remise, status: !remise.status } : remise
-      )
-    );
+  const toggleStatus = (id,status) => {
+    activateRemise(id,status)
   };
 
   return (
@@ -89,17 +163,17 @@ const Remise = () => {
           {remises.map((remise) => (
             <tr key={remise.id}>
               <td>{remise.id}</td>
-              <td>{remise.name}</td>
-              <td>{remise.percentage}%</td>
-              <td>{remise.startDate}</td>
-              <td>{remise.endDate}</td>
+              <td>{remise.titre}</td>
+              <td>{remise.pourcentageRemise}%</td>
+              <td>{formatDate(remise.date_debut)}</td>
+              <td>{formatDate(remise.date_fin)}</td>
               <td>
                 <Button
-                  variant={remise.status ? 'success' : 'secondary'}
+                  variant={remise.status=='inactive' ? 'success' : 'secondary'}
                   size="sm"
-                  onClick={() => toggleStatus(remise.id)}
+                  onClick={() => toggleStatus(remise.id,remise.status=='active'?false:true)}
                 >
-                  {remise.status ? 'Activer' : 'Désactiver'}
+                  {remise.status=='inactive' ? 'Activer' : 'Désactiver'}
                 </Button>
               </td>
               <td>
@@ -141,9 +215,9 @@ const Remise = () => {
               <Form.Control
                 type="text"
                 placeholder="Nom de la remise"
-                value={newRemise.name}
+                value={newRemise.titre}
                 onChange={(e) =>
-                  setNewRemise({ ...newRemise, name: e.target.value })
+                  setNewRemise({ ...newRemise, titre: e.target.value })
                 }
               />
             </Form.Group>
@@ -153,9 +227,9 @@ const Remise = () => {
               <Form.Control
                 type="number"
                 placeholder="Pourcentage (%)"
-                value={newRemise.percentage}
+                value={newRemise.pourcentageRemise}
                 onChange={(e) =>
-                  setNewRemise({ ...newRemise, percentage: e.target.value })
+                  setNewRemise({ ...newRemise, pourcentageRemise: e.target.value })
                 }
               />
             </Form.Group>
@@ -164,9 +238,9 @@ const Remise = () => {
               <Form.Label>Date de Début</Form.Label>
               <Form.Control
                 type="date"
-                value={newRemise.startDate}
+                value={newRemise.date_debut}
                 onChange={(e) =>
-                  setNewRemise({ ...newRemise, startDate: e.target.value })
+                  setNewRemise({ ...newRemise, date_debut: e.target.value })
                 }
               />
             </Form.Group>
@@ -175,30 +249,11 @@ const Remise = () => {
               <Form.Label>Date de Fin</Form.Label>
               <Form.Control
                 type="date"
-                value={newRemise.endDate}
+                value={newRemise.date_fin}
                 onChange={(e) =>
-                  setNewRemise({ ...newRemise, endDate: e.target.value })
+                  setNewRemise({ ...newRemise, date_fin: e.target.value })
                 }
               />
-            </Form.Group>
-
-            <Form.Group controlId="remiseStatus">
-              <Form.Label>Status</Form.Label>
-              <ToggleButtonGroup
-                type="radio"
-                name="status"
-                value={newRemise.status ? 1 : 0}
-                onChange={(value) =>
-                  setNewRemise({ ...newRemise, status: value === 1 })
-                }
-              >
-                <ToggleButton variant="success" value={1}>
-                  Activer
-                </ToggleButton>
-                <ToggleButton variant="secondary" value={0}>
-                  Désactiver
-                </ToggleButton>
-              </ToggleButtonGroup>
             </Form.Group>
           </Form>
         </Modal.Body>

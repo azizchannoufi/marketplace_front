@@ -1,31 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal } from 'react-bootstrap';
-
+import axios from 'axios'
 const Orders = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      client: 'Client A',
-      total: 150,
-      status: 'Livré',
-      products: [
-        { id: 101, name: 'Produit 1', quantity: 2, price: 50 },
-        { id: 102, name: 'Produit 2', quantity: 1, price: 50 },
-      ],
-    },
-    {
-      id: 2,
-      client: 'Client B',
-      total: 75,
-      status: 'En cours',
-      products: [
-        { id: 103, name: 'Produit 3', quantity: 3, price: 25 },
-      ],
-    },
-  ]);
+  const [orders, setOrders] = useState([]);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get('http://localhost:3002/api/commandes/admin');
+      if (response.status === 200) {
+        setOrders(response.data);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des clients :', error);
+    }
+  };
+
+  useEffect(()=>{
+    fetchOrders()
+  },[])
 
   // Afficher les détails de la commande
   const handleViewDetails = (order) => {
@@ -41,6 +37,11 @@ const Orders = () => {
     setOrders(updatedOrders);
     alert(`Commande ${orderId} annulée.`);
   };
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', options);
+  }
 
   return (
     <div className="container mt-4">
@@ -49,8 +50,10 @@ const Orders = () => {
         <thead>
           <tr>
             <th>ID Commande</th>
+            <th>Date</th>
             <th>Client</th>
             <th>Total</th>
+            <th>Mode De Payement</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -59,8 +62,10 @@ const Orders = () => {
           {orders.map((order) => (
             <tr key={order.id}>
               <td>{order.id}</td>
-              <td>{order.client}</td>
+              <td>{formatDate(order.dateCommande)}</td>
+              <td>{order.fullname}</td>
               <td>€{order.total.toFixed(2)}</td>
+              <td>{order.modePayment}</td>
               <td>{order.status}</td>
               <td>
                 <Button
@@ -95,6 +100,7 @@ const Orders = () => {
           {selectedOrder ? (
             <>
               <h5>Client : {selectedOrder.client}</h5>
+              <h6>Date : {selectedOrder.date}</h6>
               <h6>Total : €{selectedOrder.total.toFixed(2)}</h6>
               <Table striped bordered hover className="mt-3">
                 <thead>

@@ -31,13 +31,16 @@ const Evenements = () => {
 
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Liste des produits disponibles
-  const availableProducts = [
-    { id: 1, name: 'Produit 1' },
-    { id: 2, name: 'Produit 2' },
-    { id: 3, name: 'Produit 3' },
-    { id: 4, name: 'Produit 4' }
-  ];
+    // Liste des produits disponibles
+    const availableProducts = [
+      { id: 1, name: 'Produit 1' },
+      { id: 2, name: 'Produit 2' },
+      { id: 3, name: 'Produit 3' },
+      { id: 4, name: 'Produit 4' }
+    ];
+  ////////////////////////////////////////////////////////API///////////////////////////////////////////////////////////////////
+
+  
   ////////////////////////////////////////////////////////API///////////////////////////////////////////////////////////////////
 
   const [selectedProducts, setSelectedProducts] = useState([]);
